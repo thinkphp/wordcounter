@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+   <title>Word counter</title>
+   <style type="text/css">
+   html,body{font-family: georgia,helvetica,arial}
+   #results{display: none}
+   label{font-weight: bold;}
+   </style>
+   <script type="text/javascript">
+      /**
+        * @param s (String) the text to extract words.
+        * @param stopwords (Object) the object that contains stop words.
+        * @return (Array) vector that contains words sort by number of times appears.
+        */
+      function countWords(s, stopwords) {
+
+            /**
+              * Need to split up words, but not split on apostrophes.
+              * Solution is to first replace punctuation we don't care about (like fullstop and commas) with spaces;
+              * then extract all non-whitespace sequences;
+              */
+
+              //use method toLowerCase 
+              s = s.toLowerCase();
+              //replace all .,!:; to space
+              s = s.replace(/[\.\,\;\:\!\?\(\)\&]/g,' ');
+              //regexp
+              var re = /\S+/ig;
+              //declare some vars
+              var m, word;
+              //declare an object 'count'
+              var counts = {};
+
+              //use method 'exec' that returns the matched text 
+              //if it finds a match, otherwise it returns null.
+              while((m=re.exec(s)) != null) {
+                     word = m[0];
+                     if(!stopwords[word]) {
+                          counts[word] = (counts[word] || 0 ) + 1;  
+                     }
+              }
+              //define a vector that will contains words with counters.
+              var results = [];
+
+              //push words in vector results then sort by counts
+              for(var word in counts) {
+                     results.push([word, counts[word]]);
+              }
+
+              //sort elements by counts
+              results = results.sort(function(a,b){
+                     return ((a[1] < b[1]) ? -1 : ((a[1] > b[1]) ? 1 : 0));
+              });
+ 
+              //this method reverses the order of the elements in an array 
+              //(make the last element first element)
+              //end first element last element
+              results.reverse();
+
+          return results;
+   };
+
+   //if the DOM is ready then go ahead.
+   window.onload = function(){
+
+          var input = document.getElementsByName('input')[0];
+          var output = document.getElementsByName('output')[0];
+          var results = document.getElementById('results');
+          var form = document.forms[0];
+
+          form.onsubmit = function() {
+               //get element by name and then get value and split by space
+               var stopwords = document.getElementsByName('stopwords')[0].value.split(/\s+/);  
+
+               var stopwords_lookup = {};
+               for(var i=0,word;word = stopwords[i];i++) {
+                   stopwords_lookup[word] = 1; 
+               } 
+
+               var counts = countWords(input.value,stopwords_lookup);
+               var s = '';
+               for(var i=0;i<counts.length;i++) {
+                       s += counts[i][0] + '\t' + counts[i][1] + '\n';
+               }
+               results.style.display = 'inline';
+               output.value = s;
+            return false;  
+          }
+   };//end window.onload
+
+   var str = "aadasdakjjjjasdasdasdoopppppasdasdas";
+
+   function countletters(s) {
+
+      var letters = {};
+
+      str.replace(/\S/g,function(l){
+         letters[l] = letters[l]+1 || 1;
+      }); 
+
+      var results = [];
+
+      for(var let in letters) {
+          results.push([let,letters[let]]); 
+      }         
+
+      results = results.sort(function(a,b){
+              return (a[1]<b[1] ? -1 : ((a[1] > b[1]) ? 1 : 0)); 
+      });
+ 
+      results = results.reverse();
+
+     return results;
+   } 
+
+   var str = "asdkasjdklajsasdasdasdasds";
+
+   console.log(str);
+
+   var s = '';
+
+   var r = countletters(str);
+
+   for(var i=0;i<r.length;i++) {
+       s += r[i][0]+'\t'+r[i][1]+'\n';
+   }
+   console.log(s);
+   </script>
+</head>
+<body>
+<h1>Word counter</h1>
+<p>Paste in text and hit "count words" to count the number of times each word appears</p>
+<form action="" method="get">
+  <div class="textareas">
+       <p><label for="input">Input </label></p><p><textarea id="input" name="input" rows="20" cols="80"></textarea></p>
+       <p><input type="submit" value="Count words"></p>
+       <div id="results"><p><label for="output">Output:</label></p><p><textarea id="output" name="output" rows="20" cols="80"></textarea></p></div>
+       <p><label for="input">The following stop words are ignored:</label><p></p><textarea id="stopwords" name="stopwords" rows="2" cols="80"></textarea></p>
+  </div>
+</form>
+</body>
+</html>
+
